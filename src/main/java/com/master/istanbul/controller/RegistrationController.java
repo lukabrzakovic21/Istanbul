@@ -30,7 +30,7 @@ public class RegistrationController {
         this.registrationService = registrationService;
     }
 
-   @PostMapping
+   @PostMapping("/create")
     public ResponseEntity<RegistrationRequestDTO> createRegistrationRequest(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         logger.info("Create registration request started with request: {}", registrationRequestDTO);
        return ok(registrationService.createRegistrationRequest(registrationRequestDTO));

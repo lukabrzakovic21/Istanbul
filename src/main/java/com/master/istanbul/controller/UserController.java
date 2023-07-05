@@ -6,7 +6,6 @@ import com.master.istanbul.common.dto.UserUpdateDTO;
 import com.master.istanbul.common.util.LoginPair;
 import com.master.istanbul.common.util.PasswordChange;
 import com.master.istanbul.service.UserService;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
@@ -66,26 +65,26 @@ public class UserController {
         return ok(userService.updateUser(UUID.fromString(publicId), userDTO));
     }
 
-    @PatchMapping("/{publicId}/activate")
+    @PatchMapping("/activate/{publicId}")
     public ResponseEntity<UserDTO> activateUser(@PathVariable String publicId) {
         logger.info("Activating user with id: {}.", publicId);
         return ok(userService.activateUser(UUID.fromString(publicId)));
     }
 
-    @DeleteMapping("/{publicId}/deactivate")
+    @DeleteMapping("/deactivate/{publicId}")
     public ResponseEntity<HttpStatusCode> deactivateUser(@PathVariable String publicId) {
         logger.info("Deactivating user with id: {}", publicId);
         userService.deactivateUser(UUID.fromString(publicId));
         return ok(HttpStatusCode.valueOf(204));
     }
 
-    @PatchMapping("/{publicId}/role")
+    @PatchMapping("/role/{publicId}")
     public ResponseEntity<UserDTO> changeUserRole(@PathVariable String publicId, @RequestBody String role) {
         logger.info("Update user role with id: {}. New role: {}.", publicId, role);
         return ok(userService.changeUserRole(UUID.fromString(publicId), role));
     }
 
-    @PatchMapping("/{publicId}/password")
+    @PatchMapping("/password/{publicId}")
     public ResponseEntity<UserDTO> changeUserPassword(@PathVariable String publicId, @RequestBody PasswordChange passwordBody) {
         logger.info("Update user password with id: {}", publicId);
         return ok(userService.changeUserPassword(UUID.fromString(publicId), passwordBody));

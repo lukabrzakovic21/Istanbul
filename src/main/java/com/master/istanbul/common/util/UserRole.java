@@ -2,7 +2,8 @@ package com.master.istanbul.common.util;
 
 public enum UserRole {
     ADMIN,
-    USER;
+    CUSTOMER,
+    VENDOR;
 
     public static UserRole fromString(String role) {
         return valueOf(role.toUpperCase());

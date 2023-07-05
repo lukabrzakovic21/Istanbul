@@ -17,7 +17,7 @@ public class SecurityConfiguration {
 
         return http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register", "/register/*", "/user", "/user/*").permitAll()
+                .requestMatchers("/register", "/register/*", "/user", "/user/*", "/user/role/", "/user/role/*").permitAll()
                 .and()
                 .build();
     }

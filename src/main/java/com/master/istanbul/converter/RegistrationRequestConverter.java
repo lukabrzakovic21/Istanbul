@@ -24,6 +24,7 @@ public class RegistrationRequestConverter {
                 .password(dto.getPassword())
                 .phone(dto.getPhone())
                 .status(dto.getStatus())
+                .role(dto.getRole())
                 .build();
     }
 
@@ -39,6 +40,7 @@ public class RegistrationRequestConverter {
                 .password(model.getPassword())
                 .phone(model.getPhone())
                 .status(model.getStatus())
+                .role(model.getRole())
                 .build();
     }
 
