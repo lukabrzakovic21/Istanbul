@@ -1,4 +1,5 @@
-package com.master.istanbul.common.util;
+package com.master.istanbul.common.dto;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -9,18 +10,20 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 @EqualsAndHashCode
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class LoginPair {
+public class BasicUserInfoDTO {
 
-    private boolean successfulLogin;
-    private String role;
     private String publicId;
+    private String email;
+
 }

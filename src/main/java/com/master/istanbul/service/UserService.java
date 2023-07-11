@@ -1,6 +1,7 @@
 package com.master.istanbul.service;
 
 import com.master.istanbul.common.dto.AuthUserDTO;
+import com.master.istanbul.common.dto.BasicUserInfoDTO;
 import com.master.istanbul.common.dto.UserDTO;
 import com.master.istanbul.common.dto.UserUpdateDTO;
 import com.master.istanbul.common.event.UserStatusChanged;
@@ -11,11 +12,11 @@ import com.master.istanbul.common.util.PasswordEncoder;
 import com.master.istanbul.common.util.UserRole;
 import com.master.istanbul.common.util.UserStatus;
 import com.master.istanbul.converter.UserConverter;
+import com.master.istanbul.exception.custom.UnauthorizedException;
 import com.master.istanbul.exception.user.UserBadRequest;
 import com.master.istanbul.exception.user.UserNotFoundException;
 import com.master.istanbul.repository.UserRepository;
 import com.master.istanbul.validator.UserValidator;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,10 @@ public class UserService {
         return userConverter.modelToDto(userRequest);
     }
 
-    public UserDTO getByPublicId(UUID publicId, boolean includeDeactivated) {
+    public UserDTO getByPublicId(UUID publicId, boolean includeDeactivated, String sessionUserId, String role) {
+        if(!"ADMIN".equalsIgnoreCase(role) && !sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            throw new UnauthorizedException("User cannot access information about other users.");
+        }
         Optional<User> user;
         if(includeDeactivated) {
             logger.info("Finding also deactivated users with id: {}.", publicId);
@@ -75,7 +79,10 @@ public class UserService {
         return userConverter.modelToDto(user.get());
     }
 
-    public UserDTO updateUser(UUID publicId, UserUpdateDTO userDTO) {
+    public UserDTO updateUser(UUID publicId, UserUpdateDTO userDTO, String sessionUserId) {
+        if(!sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            throw new UnauthorizedException("User cannot access information about other users.");
+        }
         var user = userRepository.findByPublicIdAndStatusEquals(publicId, UserStatus.ACTIVE);
         if(user.isEmpty()) {
             logger.warn("User with provided id: {} does not exist.", publicId);
@@ -149,7 +156,10 @@ public class UserService {
         return userConverter.modelToDto(savedModel);
     }
 
-    public UserDTO changeUserPassword(UUID publicId, PasswordChange password) {
+    public UserDTO changeUserPassword(UUID publicId, PasswordChange password, String sessionUserId) {
+        if(!sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            throw new UnauthorizedException("User cannot access information about other users.");
+        }
         userValidator.checkPasswordFormat(password.getOldPassword());
         var user = userRepository.findByPublicIdAndStatusEquals(publicId, UserStatus.ACTIVE);
         if(user.isEmpty()) {
@@ -190,15 +200,25 @@ public class UserService {
         System.out.println("Istanbul generate token");
         var user = userRepository.findByEmail(userDTO.getEmail());
         if(user.isEmpty()) {
-            return new LoginPair(false, "") ;
+            return new LoginPair(false, "", "") ;
         }
         var returnedUser = user.get();
         if(UserStatus.DEACTIVATED.equals(returnedUser.getStatus())) {
-            return new LoginPair(false, "");
+            return new LoginPair(false, "", "");
         }
         var encodedPassword = returnedUser.getPassword();
         var passwordMatch = passwordEncoder.verifyPassword(userDTO.getPassword(), encodedPassword);
 
-        return new LoginPair(passwordMatch, returnedUser.getRole().name());
+        return new LoginPair(passwordMatch, returnedUser.getRole().name(), returnedUser.getPublicId().toString());
+    }
+
+    public List<BasicUserInfoDTO> getAllUsersForPublicIds(List<UUID> ids) {
+
+        var allUsers = userRepository.findAllByPublicId(ids);
+
+        return allUsers
+                .stream()
+                .map(user -> new BasicUserInfoDTO(user.getPublicId().toString(), user.getEmail()))
+                .collect(Collectors.toList());
     }
 }
