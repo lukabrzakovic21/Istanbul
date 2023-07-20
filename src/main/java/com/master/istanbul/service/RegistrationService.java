@@ -53,7 +53,7 @@ public class RegistrationService {
 
         var registrationRequest =  registrationRequestRepository.save
                 (registrationRequestConverter.dtoToModel(registrationRequestDTO));
-        logger.info("Successfully saved an entity to the database.");
+        logger.info("Successfully saved registration requests to the database.");
         return registrationRequestConverter.modelToDto(registrationRequest);
     }
 
@@ -68,6 +68,7 @@ public class RegistrationService {
 
     public RegistrationRequestDTO updateByPublicId(UUID publicId, String status) {
         if(!RegistrationRequestStatus.check(status)) {
+            logger.warn("Wrong status code provided:{}.", status);
             throw new RegistrationRequestBadRequest("Wrong status code provided.");
         }
         var registrationRequest = registrationRequestRepository.findByPublicId(publicId);
@@ -78,12 +79,13 @@ public class RegistrationService {
         var requestModel = registrationRequest.get();
         if(RegistrationRequestStatus.CREATED.name().equalsIgnoreCase(status)
                 || !RegistrationRequestStatus.CREATED.name().equalsIgnoreCase(requestModel.getStatus().name())) {
+            logger.warn("Wrong value of status code.");
             throw new RegistrationRequestBadRequest("Status code change doesn't have any sense.");
         }
 
         requestModel.setStatus(RegistrationRequestStatus.fromString(status));
         var savedModel = registrationRequestRepository.save(requestModel);
-        logger.info("Successfully updated an entity to the database.");
+        logger.info("Successfully updated registration request with id{}.", publicId);
         var eventBody = RegistrationRequestStatusChanged.builder()
                 .firstname(savedModel.getFirstname())
                 .lastname(savedModel.getLastname())
@@ -93,6 +95,7 @@ public class RegistrationService {
         var userFromRegRequest = userConverter.registrationRequestToUser(savedModel);
         if(RegistrationRequestStatus.ACCEPTED.name().equalsIgnoreCase(status)) {
             userService.createUser(userFromRegRequest);
+            logger.info("User with email: {} successfully created", userFromRegRequest.getEmail());
         }
         rabbitMqService.registrationRequestStatusChanged(eventBody);
         return registrationRequestConverter.modelToDto(savedModel);

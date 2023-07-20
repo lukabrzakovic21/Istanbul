@@ -60,6 +60,7 @@ public class UserService {
 
     public UserDTO getByPublicId(UUID publicId, boolean includeDeactivated, String sessionUserId, String role) {
         if(!"ADMIN".equalsIgnoreCase(role) && !sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            logger.warn("User cannot access information about other users.");
             throw new UnauthorizedException("User cannot access information about other users.");
         }
         Optional<User> user;
@@ -81,6 +82,7 @@ public class UserService {
 
     public UserDTO updateUser(UUID publicId, UserUpdateDTO userDTO, String sessionUserId) {
         if(!sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            logger.warn("User cannot access information about other users.");
             throw new UnauthorizedException("User cannot access information about other users.");
         }
         var user = userRepository.findByPublicIdAndStatusEquals(publicId, UserStatus.ACTIVE);
@@ -158,6 +160,7 @@ public class UserService {
 
     public UserDTO changeUserPassword(UUID publicId, PasswordChange password, String sessionUserId) {
         if(!sessionUserId.equalsIgnoreCase(publicId.toString())) {
+            logger.warn("User cannot access information about other users.");
             throw new UnauthorizedException("User cannot access information about other users.");
         }
         userValidator.checkPasswordFormat(password.getOldPassword());
@@ -183,7 +186,7 @@ public class UserService {
     public List<UserDTO> getAllUsers(boolean includeDeactivated) {
         Iterable<User> allUsers;
         if(includeDeactivated) {
-            logger.info("Searching for all users, include deactivated users.");
+            logger.info("Searching for all users, including deactivated users.");
             allUsers = userRepository.findAll();
         }
         else {
@@ -197,13 +200,15 @@ public class UserService {
     }
 
     public LoginPair authenticateUser(AuthUserDTO userDTO) {
-        System.out.println("Istanbul generate token");
+        logger.info("Authenticate user with email: {}", userDTO.getEmail());
         var user = userRepository.findByEmail(userDTO.getEmail());
         if(user.isEmpty()) {
+            logger.info("User with email: {} doesn't exist.", userDTO.getEmail());
             return new LoginPair(false, "", "") ;
         }
         var returnedUser = user.get();
         if(UserStatus.DEACTIVATED.equals(returnedUser.getStatus())) {
+            logger.info("User with email: {} doesn't exist.", userDTO.getEmail());
             return new LoginPair(false, "", "");
         }
         var encodedPassword = returnedUser.getPassword();

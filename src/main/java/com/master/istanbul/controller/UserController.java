@@ -71,8 +71,7 @@ public class UserController {
 
     @PostMapping("/all")
     public ResponseEntity<List<BasicUserInfoDTO>> getAllUsersForPublicIds(@RequestBody List<UUID> ids) {
-        logger.info("Get all users with sent public ids.");
-
+        logger.info("Get all users with sent public ids: {}.", ids);
         return ok(userService.getAllUsersForPublicIds(ids));
     }
 
@@ -88,7 +87,6 @@ public class UserController {
     @PatchMapping("/activate/{publicId}")
     public ResponseEntity<UserDTO> activateUser(@PathVariable String publicId) {
         logger.info("Activating user with id: {}.", publicId);
-
         return ok(userService.activateUser(UUID.fromString(publicId)));
     }
 

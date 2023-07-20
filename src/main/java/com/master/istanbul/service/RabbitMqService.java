@@ -23,7 +23,7 @@ public class RabbitMqService {
 
     public void registrationRequestStatusChanged(RegistrationRequestStatusChanged registrationRequest) {
         logger.info("Sending event to queue: {}  with body {}.", REGISTRATION_REQUEST_STATUS_CHANGED, registrationRequest);
-//        rabbitTemplate.convertAndSend(REGISTRATION_REQUEST_STATUS_CHANGED, registrationRequest);
+        rabbitTemplate.convertAndSend(REGISTRATION_REQUEST_STATUS_CHANGED, registrationRequest);
         logger.info("Send event to queue: {}  with body {}.", REGISTRATION_REQUEST_STATUS_CHANGED, registrationRequest);
     }
 
