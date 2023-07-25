@@ -11,8 +11,6 @@ public class RabbitMqConfiguration {
     public static final String REGISTRATION_REQUEST_STATUS_CHANGED = "registration.request.status.changed";
     public static final String USER_STATUS_CHANGED = "user.status.changed";
 
-    public static final String ITEM_AVAILABLE_AGAIN = "item.available.again";
-    public static final String ITEM_NO_LONGER_AVAILABLE = "item.no.longer.available.again";
 
     @Bean
     public Jackson2JsonMessageConverter jsonMessageConverter() {
@@ -29,13 +27,4 @@ public class RabbitMqConfiguration {
         return new Queue(USER_STATUS_CHANGED, false);
     }
 
-    @Bean
-    public Queue itemNoLongerAvailable() {
-        return new Queue(ITEM_NO_LONGER_AVAILABLE, false);
-    }
-
-    @Bean
-    public Queue itemAvailableAgain() {
-        return new Queue(ITEM_AVAILABLE_AGAIN, false);
-    }
 }
